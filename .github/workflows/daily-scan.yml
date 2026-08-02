@@ -1,0 +1,38 @@
+name: Daily Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 00:00 UTC = 07:00 UTC+7
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run scanner
+        run: python top-gainers.py --html
+
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Daily scan update'
+          file_pattern: 'top-gainers.html top-gainers.md'
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
