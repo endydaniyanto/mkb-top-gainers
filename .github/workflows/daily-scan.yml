@@ -23,11 +23,14 @@ jobs:
       - name: Run scanner
         run: python top-gainers.py --html
 
+      - name: Create index.html
+        run: cp top-gainers.html index.html
+
       - name: Commit updates
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'Daily scan update'
-          file_pattern: 'top-gainers.html top-gainers.md'
+          file_pattern: 'top-gainers.html top-gainers.md index.html'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
