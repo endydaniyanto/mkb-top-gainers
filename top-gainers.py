@@ -496,12 +496,14 @@ def generate_html(new_positions, open_positions, history, now, rr):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Top Gainers Bullish Candle Scan</title>
+<title>Crypto Trading: Top Gainers Strategy</title>
 <style>
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
 body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e1e4e8; padding: 24px; }}
 h1 {{ font-size: 1.5rem; margin-bottom: 4px; }}
 .meta {{ color: #8b949e; font-size: 0.85rem; margin-bottom: 20px; }}
+.meta a {{ color: #58a6ff; text-decoration: none; }}
+.meta a:hover {{ text-decoration: underline; }}
 .stats {{ display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }}
 .stat {{ background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 18px; min-width: 130px; }}
 .stat .label {{ font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }}
@@ -524,9 +526,9 @@ tr:hover {{ background: #161b22; }}
 </head>
 <body>
 
-<h1>Top Gainers Bullish Candle Scan</h1>
+<h1>Crypto Trading: Top Gainers Strategy</h1>
 <div class="meta">
-    {now.strftime('%Y-%m-%d %H:%M UTC')} · CoinMarketCap top {LIMIT} by market cap · Risk-Reward 1:{rr:.0f}
+    {now.strftime('%Y-%m-%d %H:%M UTC')}. Strategy by <a href="https://x.com/mkbijaksana" target="_blank">@mkbijaksana</a>. Dashboard by <a href="https://x.com/endybtc" target="_blank">@endybtc</a>
 </div>
 
 <div class="stats">
