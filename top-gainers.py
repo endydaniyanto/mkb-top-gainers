@@ -537,24 +537,16 @@ tr:hover {{ background: #161b22; }}
         <div class="value">{total}</div>
     </div>
     <div class="stat">
+        <div class="label">Open Positions</div>
+        <div class="value">{len(open_positions)}</div>
+    </div>
+    <div class="stat">
         <div class="label">Win Rate</div>
         <div class="value" style="color: {'#3fb950' if win_rate >= 50 else '#f85149'}">{win_rate:.1f}%</div>
     </div>
     <div class="stat">
         <div class="label">Profit Factor</div>
         <div class="value" style="color: {'#3fb950' if profit_factor >= 1.5 else '#d29922' if profit_factor >= 1 else '#f85149'}">{pf_str}</div>
-    </div>
-    <div class="stat">
-        <div class="label">Open Positions</div>
-        <div class="value">{len(open_positions)}</div>
-    </div>
-    <div class="stat">
-        <div class="label">Gross Profit</div>
-        <div class="value pnl-pos">${gross_profit:.4g}</div>
-    </div>
-    <div class="stat">
-        <div class="label">Gross Loss</div>
-        <div class="value pnl-neg">${gross_loss:.4g}</div>
     </div>
 </div>
 
