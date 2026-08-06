@@ -55,6 +55,15 @@ def compute_cumulative_roi(history):
     return cum
 
 
+def cumulative_roi_total(history):
+    """Overall cumulative ROI (equal-weight $1/trade) across all closed trades."""
+    rois = [
+        (t["exit_price"] - t["entry"]) / t["entry"] * 100
+        for t in history if t.get("entry")
+    ]
+    return sum(rois) / len(rois) if rois else 0.0
+
+
 def parse_positions_from_md(filepath):
     """Parse open positions and trade history from existing markdown file."""
     open_pos = []
@@ -222,6 +231,8 @@ def generate_html(new_positions, open_positions, history, now, rr, cum_roi=None)
     gross_loss = stats["gross_loss"]
     profit_factor = stats["profit_factor"]
     pf_str = f"{profit_factor:.2f}" if profit_factor != float("inf") else "∞"
+    cum_total = cumulative_roi_total(history)
+    cum_str = f"{cum_total:+.1f}%"
 
     # Build open positions rows
     open_rows = ""
@@ -340,8 +351,8 @@ tr:hover {{ background: #161b22; }}
         <div class="value" style="color: {'#3fb950' if win_rate >= 50 else '#f85149'}">{win_rate:.1f}%</div>
     </div>
     <div class="stat">
-        <div class="label">Profit Factor</div>
-        <div class="value" style="color: {'#3fb950' if profit_factor >= 1.5 else '#d29922' if profit_factor >= 1 else '#f85149'}">{pf_str}</div>
+        <div class="label">Cumulative ROI</div>
+        <div class="value" style="color: {'#3fb950' if cum_total >= 0 else '#f85149'}">{cum_str}</div>
     </div>
 </div>
 
