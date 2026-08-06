@@ -25,24 +25,19 @@ def analyze(candles, rr=2.0):
         results["prev_type"] = "RED" if results["c3"] else "GREEN"
         results["n_ohlc"] = (f"O={n['open']:.6g} H={n['high']:.6g} "
                              f"L={n['low']:.6g} C={n['close']:.6g}")
-        results["n1_ohlc"] = (f"O={n1['open']:.6g} H={n1['high']:.6g} "
-                              f"L={n1['low']:.6g} C={n1['close']:.6g}")
 
         results["entry"] = n["close"]
         results["stop_loss"] = n["low"]
         risk = results["entry"] - results["stop_loss"]
-        results["risk"] = risk
-        results["reward"] = risk * rr
-        results["take_profit"] = results["entry"] + results["reward"]
+        reward = risk * rr
+        results["take_profit"] = results["entry"] + reward
         results["risk_pct"] = round((risk / results["entry"]) * 100, 1) if results["entry"] > 0 else 0
-        results["reward_pct"] = round((results["reward"] / results["entry"]) * 100, 1) if results["entry"] > 0 else 0
+        results["reward_pct"] = round((reward / results["entry"]) * 100, 1) if results["entry"] > 0 else 0
 
     n_vol = n["volume"]
     prev_vols = [c["volume"] for c in candles[-6:-1]]
     avg_vol = sum(prev_vols) / len(prev_vols) if prev_vols else 0
     results["c4"] = n_vol > avg_vol if avg_vol > 0 else None
-    results["c4_n_vol"] = n_vol
-    results["c4_avg_vol"] = avg_vol
     results["c4_ratio"] = round(n_vol / avg_vol, 2) if avg_vol > 0 else 0
 
     return results, None

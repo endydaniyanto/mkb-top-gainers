@@ -16,7 +16,7 @@ Trading levels:
   Take Profit = Entry + (Entry - SL) x RR
 
 Usage:
-  python top-gainers.py [--top N] [--min-gain PCT] [--rr RATIO] [--output FILE] [--html] [--html-output FILE] [--update-only]
+  python top-gainers.py [--top N] [--min-gain PCT] [--rr RATIO] [--output FILE] [--html-output FILE] [--update-only]
 """
 
 import time
@@ -25,7 +25,6 @@ import os
 from datetime import datetime, timezone
 
 from api import (
-    get_kucoin_symbols,
     fetch_ohlcv_kucoin,
     fetch_daily_klines_since,
     fetch_top_gainers,
@@ -54,7 +53,6 @@ def main():
     rr = RR
     output = OUTPUT_FILE
     html_output = HTML_OUTPUT_FILE
-    generate_html_flag = True
     update_only = False
     args = sys.argv[1:]
     i = 0
@@ -67,12 +65,10 @@ def main():
             rr = float(args[i + 1]); i += 2
         elif args[i] == "--output" and i + 1 < len(args):
             output = args[i + 1]; i += 2
-        elif args[i] == "--html":
-            generate_html_flag = True; i += 1
         elif args[i] == "--html-output" and i + 1 < len(args):
-            html_output = args[i + 1]; generate_html_flag = True; i += 2
+            html_output = args[i + 1]; i += 2
         elif args[i] == "--update-only":
-            update_only = True; generate_html_flag = True; i += 1
+            update_only = True; i += 1
         else:
             i += 1
 
@@ -267,12 +263,11 @@ def main():
         f.write(md)
     print(f"\n  Results saved to: {output}")
 
-    # ── Step 4b: Generate HTML dashboard if requested ──
-    if generate_html_flag:
-        html = generate_html(new_entries, still_open, history, now, rr)
-        with open(html_output, "w", encoding="utf-8") as f:
-            f.write(html)
-        print(f"  Dashboard saved to: {html_output}")
+    # ── Step 4b: Generate HTML dashboard ──
+    html = generate_html(new_entries, still_open, history, now, rr)
+    with open(html_output, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  Dashboard saved to: {html_output}")
 
     # ── Summary ──
     wins = len([t for t in history if t["result"] == "WIN"])
