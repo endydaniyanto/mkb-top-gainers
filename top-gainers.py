@@ -33,6 +33,7 @@ from report import (
     parse_positions_from_md,
     generate_markdown,
     generate_html,
+    compute_cumulative_roi,
 )
 from strategy import analyze
 
@@ -257,14 +258,17 @@ def main():
             "current": "—",
         })
 
+    # ── Step 3b: Cumulative ROI across closed trades ──
+    cum_roi = compute_cumulative_roi(history)
+
     # ── Step 4: Write updated markdown ──
-    md = generate_markdown(new_entries, still_open, history, now, rr)
+    md = generate_markdown(new_entries, still_open, history, now, rr, cum_roi)
     with open(output, "w", encoding="utf-8") as f:
         f.write(md)
     print(f"\n  Results saved to: {output}")
 
     # ── Step 4b: Generate HTML dashboard ──
-    html = generate_html(new_entries, still_open, history, now, rr)
+    html = generate_html(new_entries, still_open, history, now, rr, cum_roi)
     with open(html_output, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"  Dashboard saved to: {html_output}")

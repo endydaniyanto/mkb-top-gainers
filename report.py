@@ -34,6 +34,27 @@ def compute_stats(history):
     }
 
 
+def compute_cumulative_roi(history):
+    """Cumulative ROI (equal-weight $1/trade) after each closed trade.
+
+    Returns a dict keyed by (symbol, date) -> cumulative ROI % at that trade's
+    chronological position. ROI per trade is recomputed from entry/exit_price
+    (not the rounded pnl_pct string) for accuracy.
+    """
+    ordered = sorted(history, key=lambda t: t["date"])
+    cum = {}
+    running = 0.0
+    count = 0
+    for t in ordered:
+        if not t.get("entry"):
+            continue
+        roi = (t["exit_price"] - t["entry"]) / t["entry"] * 100
+        running += roi
+        count += 1
+        cum[(t["symbol"], t["date"])] = running / count
+    return cum
+
+
 def parse_positions_from_md(filepath):
     """Parse open positions and trade history from existing markdown file."""
     open_pos = []
@@ -101,7 +122,7 @@ def parse_positions_from_md(filepath):
     return open_pos, history
 
 
-def generate_markdown(new_positions, open_positions, history, now, rr):
+def generate_markdown(new_positions, open_positions, history, now, rr, cum_roi=None):
     lines = []
     lines.append("# Top Gainers Bullish Candle Scan")
     lines.append("")
@@ -167,14 +188,16 @@ def generate_markdown(new_positions, open_positions, history, now, rr):
     if history:
         lines.append("## Trade History")
         lines.append("")
-        lines.append("| Token | Date | Result | Entry | Exit | PnL | Peak | Type |")
-        lines.append("|-------|------|--------|-------|------|-----|------|------|")
+        lines.append("| Token | Date | Result | Entry | Exit | PnL | Peak | Type | Cum ROI |")
+        lines.append("|-------|------|--------|-------|------|-----|------|------|---------|")
         for t in reversed(history):
             emoji = "✅" if t["result"] == "WIN" else "❌"
             peak = t.get("peak", "—")
+            c = cum_roi.get((t["symbol"], t["date"])) if cum_roi else None
+            c_str = f"{c:+.1f}%" if c is not None else "—"
             lines.append(
                 f"| {t['symbol']} | {t['date']} | {emoji} {t['result']} "
-                f"| ${t['entry']:.4g} | ${t['exit_price']:.4g} | {t['pnl_pct']} | {peak} | {t['exit_type']} |"
+                f"| ${t['entry']:.4g} | ${t['exit_price']:.4g} | {t['pnl_pct']} | {peak} | {t['exit_type']} | {c_str} |"
             )
         lines.append("")
 
@@ -185,7 +208,7 @@ def generate_markdown(new_positions, open_positions, history, now, rr):
     return "\n".join(lines)
 
 
-def generate_html(new_positions, open_positions, history, now, rr):
+def generate_html(new_positions, open_positions, history, now, rr, cum_roi=None):
     def token_cell(symbol):
         url = f"https://www.kucoin.com/trade/{symbol}-USDT"
         return f'<a href="{url}" target="_blank">{symbol}</a>'
@@ -241,6 +264,9 @@ def generate_html(new_positions, open_positions, history, now, rr):
     for t in reversed(history):
         result_class = "pnl-pos" if t["result"] == "WIN" else "pnl-neg"
         emoji = "✅" if t["result"] == "WIN" else "❌"
+        c = cum_roi.get((t["symbol"], t["date"])) if cum_roi else None
+        c_class = "pnl-pos" if (c is not None and c >= 0) else "pnl-neg" if c is not None else ""
+        c_str = f"{c:+.1f}%" if c is not None else "—"
         history_rows += f"""<tr>
             <td class="token">{token_cell(t['symbol'])}</td>
             <td>{t['date']}</td>
@@ -250,6 +276,7 @@ def generate_html(new_positions, open_positions, history, now, rr):
             <td class="{result_class}">{t['pnl_pct']}</td>
             <td>{t.get('peak', '—').split('(')[-1].rstrip(')') if '(' in t.get('peak', '') else t.get('peak', '—')}</td>
             <td>{t['exit_type']}</td>
+            <td class="{c_class}">{c_str}</td>
         </tr>\n"""
 
     html = f"""<!DOCTYPE html>
@@ -330,7 +357,7 @@ tr:hover {{ background: #161b22; }}
 
 <div class="section">
     <h2>Trade History</h2>
-    {"<table><tr><th>Token</th><th>Date</th><th>Result</th><th>Entry</th><th>Exit</th><th>PnL</th><th>Peak</th><th>Type</th></tr>" + history_rows + "</table>" if history else '<div class="empty">No completed trades yet</div>'}
+    {"<table><tr><th>Token</th><th>Date</th><th>Result</th><th>Entry</th><th>Exit</th><th>PnL</th><th>Peak</th><th>Type</th><th>Cum ROI</th></tr>" + history_rows + "</table>" if history else '<div class="empty">No completed trades yet</div>'}
 </div>
 
 <div class="section">
