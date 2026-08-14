@@ -219,7 +219,7 @@ def generate_markdown(new_positions, open_positions, history, now, rr, cum_roi=N
 
 def generate_html(new_positions, open_positions, history, now, rr, cum_roi=None):
     def token_cell(symbol):
-        url = f"https://www.kucoin.com/trade/{symbol}-USDT"
+        url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{symbol}USDT"
         return f'<a href="{url}" target="_blank">{symbol}</a>'
 
     stats = compute_stats(history)
